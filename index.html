@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Time</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-color: #1a202c;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --border-color: rgba(255, 255, 255, 0.5);
+            --gradient-text: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --sun-color: #f6d365;
+            --moon-color: transparent;
+        }
+
+        .dark-mode {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --gradient-text: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --sun-color: transparent;
+            --moon-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(102, 126, 234, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(118, 75, 162, 0.1), transparent 25%);
+        }
+
+        .dark-mode body {
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(67, 233, 123, 0.1), transparent 25%),
+                radial-gradient(circle at 80% 20%, rgba(56, 249, 215, 0.1), transparent 25%);
+        }
+
+        .clock-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 3.5rem 5rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            transform: translateY(0);
+        }
+
+        .clock-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .dark-mode .clock-container:hover {
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            transition: all 0.8s ease;
+        }
+
+        .icon-sun {
+            background-color: var(--sun-color);
+            box-shadow: 0 0 15px var(--sun-color);
+            display: block;
+        }
+
+        .icon-moon {
+            background-color: transparent;
+            box-shadow: inset -8px -8px 0 0 var(--moon-color);
+            display: none;
+            transform: rotate(-25deg);
+        }
+
+        .dark-mode .icon-sun { display: none; }
+        .dark-mode .icon-moon { display: block; }
+
+        #greeting {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        #time {
+            font-size: 6rem;
+            font-weight: 700;
+            letter-spacing: -3px;
+            line-height: 1;
+            margin: 0.5rem 0;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #date {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 500;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clock-container">
+        <div class="header">
+            <div class="icon icon-sun"></div>
+            <div class="icon icon-moon"></div>
+            <div id="greeting">Hello</div>
+        </div>
+        <div id="time">00<span class="pulse">:</span>00<span class="pulse">:</span>00</div>
+        <div id="date">Loading...</div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            
+            // Assume day is from 6 AM to 6 PM (18:00)
+            const isNight = hours >= 18 || hours < 6;
+            
+            if (isNight) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('greeting').textContent = hours < 6 ? 'Good Night' : 'Good Evening';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('greeting').textContent = hours >= 12 ? 'Good Afternoon' : 'Good Morning';
+            }
+
+            // Formatting Time (HH:MM:SS)
+            const h = hours.toString().padStart(2, '0');
+            const m = minutes.toString().padStart(2, '0');
+            const s = seconds.toString().padStart(2, '0');
+            
+            document.getElementById('time').innerHTML = `${h}<span class="pulse">:</span>${m}<span class="pulse">:</span>${s}`;
+
+            // Formatting Date
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString(undefined, dateOptions);
+        }
+
+        // Run immediately, then every second
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
